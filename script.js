@@ -12,6 +12,11 @@ let cropMode = false;
 let isDragging = false;
 let startX = 0;
 let startY = 0;
+let selX = 0;
+let selY = 0;
+let selW = 0;
+let selH = 0;
+
 
 openButton.addEventListener("click", () => {
   const url = urlInput.value;
@@ -76,26 +81,74 @@ imageStage.addEventListener("mousedown", (e) => {
 
 imageStage.addEventListener("mousemove", (e) => {
   if (!cropMode || !isDragging) return;
-  console.log("mousemove fired");
 
   const rect = imageStage.getBoundingClientRect();
   const currentX = e.clientX - rect.left;
   const currentY = e.clientY - rect.top;
 
-  const x = Math.min(startX, currentX);
-  const y = Math.min(startY, currentY);
-  const w = Math.abs(currentX - startX);
-  const h = Math.abs(currentY - startY);
+  selX = Math.min(startX, currentX);
+  selY = Math.min(startY, currentY);
+  selW = Math.abs(currentX - startX);
+  selH = Math.abs(currentY - startY);
 
-  selectionBox.style.left = `${x}px`;
-  selectionBox.style.top = `${y}px`;
-  selectionBox.style.width = `${w}px`;
-  selectionBox.style.height = `${h}px`;
+  selectionBox.style.left = `${selX}px`;
+  selectionBox.style.top = `${selY}px`;
+  selectionBox.style.width = `${selW}px`;
+  selectionBox.style.height = `${selH}px`;
 });
 
 window.addEventListener("mouseup", () => {
   if (!cropMode || !isDragging) return;
-  console.log("mouseup fired");
 
   isDragging = false;
+  console.log("Selection locked", { selX, selY, selW, selH });
+
+  // 0) must have an image
+  if (!freezeImage.src) {
+    console.log("No snapshot to crop. Freeze first.");
+    selectionBox.style.display = "none";
+    return;
+  }
+
+  // 1) ignore tiny selections
+  if (selW < 10 || selH < 10) {
+    console.log("Selection too small, ignoring.");
+    selectionBox.style.display = "none";
+    return;
+  }
+
+  // 2) confirm destructive replace
+  const ok = window.confirm("Crop this area? This will replace the current snapshot.");
+  if (!ok) {
+    console.log("Crop cancelled.");
+    selectionBox.style.display = "none";
+    return;
+  }
+
+  // 3) convert selection (CSS pixels) -> image pixels
+  const imgRect = freezeImage.getBoundingClientRect();
+  const scaleX = freezeImage.naturalWidth / imgRect.width;
+  const scaleY = freezeImage.naturalHeight / imgRect.height;
+
+  const cropX = Math.round(selX * scaleX);
+  const cropY = Math.round(selY * scaleY);
+  const cropW = Math.round(selW * scaleX);
+  const cropH = Math.round(selH * scaleY);
+
+  console.log("Cropping at:", { cropX, cropY, cropW, cropH });
+
+  // 4) crop & replace
+  const canvas = document.createElement("canvas");
+  canvas.width = cropW;
+  canvas.height = cropH;
+
+  const ctx = canvas.getContext("2d");
+  ctx.drawImage(
+    freezeImage,
+    cropX, cropY, cropW, cropH,
+    0, 0, cropW, cropH
+  );
+
+  freezeImage.src = canvas.toDataURL("image/png");
+  selectionBox.style.display = "none";
 });
