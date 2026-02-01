@@ -3,6 +3,7 @@
     <head>
         <meta charset="UFT-8" />
         <title>Freeze v1</title>
+        <link rel="stylesheet" href="style.css" />
     </head>
     <body>
         <h1>Freeze v1</h1>
@@ -11,7 +12,12 @@
 
         <button id="openBtn">Open</button>
         <button id="freezeBtn">Freeze</button>
-        <img id="freezeImage" alt=" Frozen snapshot" />
+        <button id="cropBtn">Crop</button>
+
+        <div id="imageStage">
+            <img id="freezeImage" alt=" Frozen snapshot" draggable="false"/>
+            <div id="selectionBox"></div>
+        </div>
         <script src="script.js"></script>
     </body>
 </html>

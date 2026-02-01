@@ -4,6 +4,14 @@ const openButton = document.getElementById("openBtn");
 const urlInput = document.getElementById("urlInput");
 const freezeButton = document.getElementById("freezeBtn")
 const freezeImage = document.getElementById("freezeImage")
+const cropButton = document.getElementById("cropBtn");
+const imageStage = document.getElementById("imageStage");
+const selectionBox = document.getElementById("selectionBox");
+
+let cropMode = false;
+let isDragging = false;
+let startX = 0;
+let startY = 0;
 
 openButton.addEventListener("click", () => {
   const url = urlInput.value;
@@ -39,4 +47,55 @@ freezeButton.addEventListener("click", async () => {
     } catch (err) {
         console.log("Capture cancelled or blocked");
     }
+});
+
+cropButton.addEventListener("click", () => {
+  cropMode = !cropMode;
+
+  selectionBox.style.display = "none";
+  isDragging = false;
+
+  console.log("Crop mode:", cropMode ? "ON" : "OFF");
+});
+
+imageStage.addEventListener("mousedown", (e) => {
+  if (!cropMode) return;
+
+  const rect = imageStage.getBoundingClientRect();
+  startX = e.clientX - rect.left;
+  startY = e.clientY - rect.top;
+
+  isDragging = true;
+
+  selectionBox.style.left = `${startX}px`;
+  selectionBox.style.top = `${startY}px`;
+  selectionBox.style.width = "0px";
+  selectionBox.style.height = "0px";
+  selectionBox.style.display = "block";
+});
+
+imageStage.addEventListener("mousemove", (e) => {
+  if (!cropMode || !isDragging) return;
+  console.log("mousemove fired");
+
+  const rect = imageStage.getBoundingClientRect();
+  const currentX = e.clientX - rect.left;
+  const currentY = e.clientY - rect.top;
+
+  const x = Math.min(startX, currentX);
+  const y = Math.min(startY, currentY);
+  const w = Math.abs(currentX - startX);
+  const h = Math.abs(currentY - startY);
+
+  selectionBox.style.left = `${x}px`;
+  selectionBox.style.top = `${y}px`;
+  selectionBox.style.width = `${w}px`;
+  selectionBox.style.height = `${h}px`;
+});
+
+window.addEventListener("mouseup", () => {
+  if (!cropMode || !isDragging) return;
+  console.log("mouseup fired");
+
+  isDragging = false;
 });
