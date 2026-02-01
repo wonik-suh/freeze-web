@@ -22,3 +22,9 @@ body {
   display: none;
   pointer-events: none;
 }
+
+#cropStatus {
+  margin-top: 8px;
+  font-size: 14px;
+  color: #555;
+}

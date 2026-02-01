@@ -7,6 +7,8 @@ const freezeImage = document.getElementById("freezeImage")
 const cropButton = document.getElementById("cropBtn");
 const imageStage = document.getElementById("imageStage");
 const selectionBox = document.getElementById("selectionBox");
+const cropStatus = document.getElementById("cropStatus");
+
 
 let cropMode = false;
 let isDragging = false;
@@ -56,11 +58,15 @@ freezeButton.addEventListener("click", async () => {
 
 cropButton.addEventListener("click", () => {
   cropMode = !cropMode;
-
   selectionBox.style.display = "none";
   isDragging = false;
+  
+  if (cropMode) {
+    cropStatus.textContent = "Crop mode is ON - drag to select an area";
+  } else {
+    cropStatus.textContent = "Crop mode is OFF";
+  }
 
-  console.log("Crop mode:", cropMode ? "ON" : "OFF");
 });
 
 imageStage.addEventListener("mousedown", (e) => {
@@ -103,29 +109,22 @@ window.addEventListener("mouseup", () => {
   isDragging = false;
   console.log("Selection locked", { selX, selY, selW, selH });
 
-  // 0) must have an image
   if (!freezeImage.src) {
-    console.log("No snapshot to crop. Freeze first.");
     selectionBox.style.display = "none";
     return;
   }
 
-  // 1) ignore tiny selections
   if (selW < 10 || selH < 10) {
-    console.log("Selection too small, ignoring.");
     selectionBox.style.display = "none";
     return;
   }
 
-  // 2) confirm destructive replace
   const ok = window.confirm("Crop this area? This will replace the current snapshot.");
   if (!ok) {
-    console.log("Crop cancelled.");
     selectionBox.style.display = "none";
     return;
   }
 
-  // 3) convert selection (CSS pixels) -> image pixels
   const imgRect = freezeImage.getBoundingClientRect();
   const scaleX = freezeImage.naturalWidth / imgRect.width;
   const scaleY = freezeImage.naturalHeight / imgRect.height;
@@ -135,9 +134,6 @@ window.addEventListener("mouseup", () => {
   const cropW = Math.round(selW * scaleX);
   const cropH = Math.round(selH * scaleY);
 
-  console.log("Cropping at:", { cropX, cropY, cropW, cropH });
-
-  // 4) crop & replace
   const canvas = document.createElement("canvas");
   canvas.width = cropW;
   canvas.height = cropH;
