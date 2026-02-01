@@ -1,119 +1,171 @@
-# Freeze Web
+# Freeze v1
 
-Freeze Web is a lightweight, web-based tool designed to reduce resource usage during gameplay by turning heavy web pages into static snapshots.
+Freeze v1 is a lightweight web-based tool that freezes a moment into a static snapshot for fast reference.
 
-Instead of keeping ad-heavy guide sites open in the background, users can freeze the exact moment they need and view it as a static image with near-zero CPU and memory usage.
+It is designed for situations where keeping guide pages open during gameplay causes unnecessary CPU and memory usage due to ads, scripts, and heavy DOM activity.
+
+Freeze captures only what you need, only when you need it, and immediately stops all background activity.
 
 ---
 
 ## Problem
 
-During games, especially competitive or resource-sensitive ones, keeping guide websites open (e.g. item builds, comps, references) often causes:
+Many game guide and reference websites are heavy on ads and third-party scripts, continuously consuming CPU and memory.
 
-- High CPU usage from ads and scripts
-- Increased memory consumption
-- Frame drops and overall performance degradation
-
-Existing solutions typically require leaving the page fully active in the background, even when the content itself is static.
+During gameplay, users often need only a single moment of information (such as a map, a skill description, or a pattern image), not a live webpage running in the background.
 
 ---
 
-## Core Idea
+## Core Concept
 
-**Freeze the page, not the tab.**
+Freeze does not keep pages alive.
 
-Freeze Web does not attempt to keep the original webpage alive.  
-Instead, it captures the exact moment the user needs and replaces the live page with a static snapshot.
+Freeze is intentionally designed around the idea of freezing a single visual moment instead of preserving or embedding a live webpage.
 
-This drastically reduces resource usage while preserving the information the player actually cares about.
-
----
-
-## Why Not iframe or DOM Freezing?
-
-Several naïve approaches were intentionally rejected:
-
-- **iframe embedding**  
-  Most modern websites block iframe usage via security headers (CSP, X-Frame-Options).
-
-- **DOM / HTML freezing**  
-  Cross-origin policies prevent accessing or serializing third-party page content safely.
-
-- **Automatic background capture**  
-  Disallowed by browser security models without explicit user permission.
-
-Freeze Web respects browser security constraints instead of working around them.
+Key principles:
+- No live page embedding
+- No DOM or HTML extraction
+- No background activity after capture
+- Everything becomes a static image
 
 ---
 
-## Solution (v1)
+## What Freeze v1 Does
 
-Freeze Web uses the **Screen Capture API** with explicit user consent.
-
-### Flow
-1. User enters a URL and opens it in a new tab
-2. User navigates to the desired state of the page
-3. User clicks **Freeze**
-4. Browser asks which tab/window to capture (user-approved)
-5. A single-frame snapshot is captured
-6. The live connection is immediately terminated
-7. The frozen snapshot is displayed as a static image
+- Open a URL in a new tab (convenience feature)
+- Freeze a user-selected tab, window, or screen using the Screen Capture API
+- Capture a single frame only
+- Immediately stop the capture stream
+- Display the frozen snapshot as a static image
+- Allow drag-to-crop with user confirmation (destructive replace)
+- Provide clear UI indicators for crop mode and instructions
+- Remain lightweight with no external scripts or ads
 
 ---
 
-## Features (v1)
+## What Freeze v1 Explicitly Does NOT Do
 
-- URL launcher (opens target site in a new tab)
-- One-click Freeze button
-- User-approved screen/tab capture
-- Static image viewer
-- Freeze history with thumbnails
-- Minimal, ad-free UI
-
----
-
-## Explicit Non-Goals
-
-To keep v1 focused and achievable, the following are intentionally out of scope:
-
+Freeze v1 intentionally avoids the following:
+- iframe-based browsing of other websites
+- Automatic DOM or HTML freezing
 - Browser extensions
-- Always-on-top overlays
-- DOM inspection or OCR
-- Automatic content extraction
-- Game client interaction
-- Commercialization or monetization
+- Always-on overlay windows
+- OCR or text recognition
+- Automation or game client control
+- Monetization or tracking
+
+These constraints are deliberate design decisions to respect browser security boundaries and keep the tool lightweight.
 
 ---
 
-## Design Philosophy
+## Design Decisions
 
-- Respect browser security models
-- Prefer explicit user consent over automation
-- Optimize for simplicity and reliability
-- Finish a small, well-defined tool instead of an over-scoped system
+### Screen Capture API Only
 
----
+Freeze uses the Screen Capture API (`getDisplayMedia`) exclusively.
 
-## Future Directions (Non-v1)
-
-- Browser extension for true in-tab freezing
-- Annotation and highlighting on frozen snapshots
-- Lightweight reader / info-extraction mode
-- Comparison view between multiple freezes
-
-These are intentionally deferred to keep v1 lightweight and complete.
+Reasons:
+- Respects cross-origin and browser security policies
+- Requires explicit user approval
+- Works with any website without embedding or scraping
+- Avoids fragile or blocked techniques
 
 ---
 
-## Tech Stack
+### Single-Frame Capture and Immediate Stop
 
-- HTML / CSS / JavaScript
-- Screen Capture API
-- No external frameworks required
+Only one frame is captured, and the media stream is stopped immediately after capture.
+
+This minimizes CPU and memory usage and aligns with the concept of freezing a single moment.
 
 ---
 
-## Status
+### Destructive Crop with Confirmation
 
-Current version: **v1 (Web, Screen Capture–based)**  
-This project is designed as a focused frontend portfolio piece demonstrating problem definition, constraint-aware design, and intentional scope control.
+Crop operations replace the current snapshot instead of creating versions.
+
+Reasons:
+- Keeps state management simple
+- Reduces UI and cognitive complexity
+- Encourages fast re-freezing instead of undo stacks
+
+A confirmation dialog is used to prevent accidental edits.
+
+---
+
+### Open Feature (Convenience, Not a Dependency)
+
+The Open feature is provided as a convenience shortcut.
+
+Freeze does not depend on pages being opened through the app. Any already-open tab or window can be frozen.
+
+Freeze does not attempt to control or manage browser tab focus, as browsers intentionally restrict this behavior for security reasons.
+
+---
+
+## How to Use
+
+1. Enter a URL and click Open (optional)
+2. Return to the Freeze tab
+3. Click Freeze
+4. Select a tab, window, or screen to capture
+5. A static snapshot appears immediately
+6. Optionally click Crop, drag to select an area, and confirm
+
+---
+
+## User Interface Notes
+
+- Crop mode clearly indicates whether it is ON or OFF
+- Inline instructions guide the user during cropping
+- Default browser image drag behavior is disabled to avoid interference
+
+The UI intentionally avoids visual noise and unnecessary controls.
+
+---
+
+## Technology
+
+- HTML
+- CSS
+- JavaScript
+- Screen Capture API (`navigator.mediaDevices.getDisplayMedia`)
+- Canvas API (single-frame capture and cropping)
+
+No frameworks, extensions, or external libraries are used.
+
+---
+
+## Limitations
+
+- Requires a modern browser (Chrome or Edge recommended)
+- User must manually switch tabs after opening a URL
+- Snapshot quality depends on the selected source and resolution
+
+These limitations stem from browser security policies and are intentionally respected.
+
+---
+
+## Roadmap (Optional)
+
+Possible future improvements beyond v1:
+- Freeze history with thumbnail previews
+- Local persistence using IndexedDB
+- Clear history action
+- Optional keyboard shortcuts
+
+These items are explicitly out of scope for v1.
+
+---
+
+## License
+
+This project is provided as a personal learning and portfolio project.
+
+---
+
+## Final Notes
+
+Freeze v1 prioritizes clarity over cleverness, user consent over automation, and lightweight behavior over feature expansion.
+
+If something goes wrong, the fastest solution is often to simply freeze again.
