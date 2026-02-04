@@ -38,7 +38,11 @@ Key principles:
 - Immediately stop the capture stream
 - Display the frozen snapshot as a static image
 - Allow drag-to-crop with user confirmation (destructive replace)
-- Provide clear UI indicators for crop mode and instructions
+- Automatically exit crop mode after each use
+- Show clear crop mode indicators, cursor changes, and inline instructions
+- Provide a lightweight, in-memory snapshot history (up to 5 items)
+- Allow switching between snapshots via clickable thumbnails
+- Allow deleting snapshots from the current session
 - Remain lightweight with no external scripts or ads
 
 ---
@@ -53,6 +57,7 @@ Freeze v1 intentionally avoids the following:
 - OCR or text recognition
 - Automation or game client control
 - Monetization or tracking
+- Persistent storage of snapshots
 
 These constraints are deliberate design decisions to respect browser security boundaries and keep the tool lightweight.
 
@@ -76,7 +81,7 @@ Reasons:
 
 Only one frame is captured, and the media stream is stopped immediately after capture.
 
-This minimizes CPU and memory usage and aligns with the concept of freezing a single moment.
+This minimizes CPU and memory usage and aligns with the concept of freezing a single moment rather than maintaining live content.
 
 ---
 
@@ -91,6 +96,22 @@ Reasons:
 
 A confirmation dialog is used to prevent accidental edits.
 
+Crop mode is designed as a single-use action and automatically exits after a successful crop to reduce accidental edits.
+
+---
+
+### Snapshot History (v1 Thin History)
+
+Freeze v1 includes a lightweight, in-memory snapshot history.
+
+- Stores up to 5 snapshots per session
+- Snapshots are not persisted across reloads
+- Thumbnails can be clicked to switch the active snapshot
+- Crop edits overwrite the currently active snapshot
+- Snapshots can be deleted by the user during the session
+
+This design keeps memory usage predictable while improving usability during short reference sessions.
+
 ---
 
 ### Open Feature (Convenience, Not a Dependency)
@@ -99,25 +120,31 @@ The Open feature is provided as a convenience shortcut.
 
 Freeze does not depend on pages being opened through the app. Any already-open tab or window can be frozen.
 
-Freeze does not attempt to control or manage browser tab focus, as browsers intentionally restrict this behavior for security reasons.
+Freeze does not attempt to control browser tab focus or automatically close tabs, as browsers intentionally restrict this behavior for security reasons.
+
+After freezing a snapshot, users may manually close the source tab if desired.
 
 ---
 
 ## How to Use
 
-1. Enter a URL and click Open (optional)
+1. Enter a URL and click **Open** (optional convenience)
 2. Return to the Freeze tab
-3. Click Freeze
+3. Click **Freeze**
 4. Select a tab, window, or screen to capture
 5. A static snapshot appears immediately
-6. Optionally click Crop, drag to select an area, and confirm
+6. Optionally click **Crop**, drag to select an area, and confirm
+7. Use the thumbnail history to switch between or delete recent snapshots
 
 ---
 
 ## User Interface Notes
 
 - Crop mode clearly indicates whether it is ON or OFF
+- The cursor changes to a crosshair during crop mode
 - Inline instructions guide the user during cropping
+- The active snapshot thumbnail is visually highlighted
+- The snapshot work area is visually separated with a border
 - Default browser image drag behavior is disabled to avoid interference
 
 The UI intentionally avoids visual noise and unnecessary controls.
@@ -140,21 +167,21 @@ No frameworks, extensions, or external libraries are used.
 
 - Requires a modern browser (Chrome or Edge recommended)
 - User must manually switch tabs after opening a URL
+- Snapshots are stored in memory only and cleared on reload
 - Snapshot quality depends on the selected source and resolution
 
 These limitations stem from browser security policies and are intentionally respected.
 
 ---
 
-## Roadmap (Optional)
+## Roadmap (Beyond v1)
 
-Possible future improvements beyond v1:
-- Freeze history with thumbnail previews
-- Local persistence using IndexedDB
-- Clear history action
-- Optional keyboard shortcuts
+Possible future improvements:
+- Persistent snapshot history (IndexedDB)
+- Clear-all history controls
+- Basic keyboard shortcuts
 
-These items are explicitly out of scope for v1.
+These items are intentionally out of scope for v1.
 
 ---
 
