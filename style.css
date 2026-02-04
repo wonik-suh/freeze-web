@@ -5,6 +5,8 @@ body {
 #imageStage {
   position: relative;
   display: inline-block;
+  border: 1px solid #000000;
+  padding: 6px;
 }
 
 #freezeImage {
@@ -23,8 +25,59 @@ body {
   pointer-events: none;
 }
 
+#imageStage.crop-mode {
+  cursor: crosshair;
+}
+
 #cropStatus {
   margin-top: 8px;
   font-size: 14px;
   color: #555;
+}
+
+#history {
+  margin-top: 16px;
+}
+
+.history-title {
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 8px;
+}
+
+#historyList {
+  display: flex;
+  gap: 8px;
+}
+
+.history-thumb {
+  width: 80px;
+  height: 45px;
+  object-fit: cover;
+  border: 1px solid #ccc;
+  cursor: pointer;
+}
+
+.history-thumb.active {
+  border: 2px solid black;
+}
+
+.history-item {
+  position: relative;
+  display: inline-block;
+}
+
+.history-delete {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 18px;
+  height: 18px;
+  border: 1px solid #ccc;
+  border-radius: 50%;
+  background: white;
+  cursor: pointer;
+  line-height: 16px;
+  text-align: center;
+  font-size: 12px;
 }

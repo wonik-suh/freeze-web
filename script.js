@@ -8,7 +8,7 @@ const cropButton = document.getElementById("cropBtn");
 const imageStage = document.getElementById("imageStage");
 const selectionBox = document.getElementById("selectionBox");
 const cropStatus = document.getElementById("cropStatus");
-
+const historyList = document.getElementById("historyList")
 
 let cropMode = false;
 let isDragging = false;
@@ -18,7 +18,88 @@ let selX = 0;
 let selY = 0;
 let selW = 0;
 let selH = 0;
+let activeSnapshotIndex = -1;
 
+const snapshots = [];
+const MAX_SNAPSHOTS = 5;
+
+function addSnapshot(src) {
+  if (!src) return;
+
+  snapshots.push({ src });
+
+  if (snapshots.length > MAX_SNAPSHOTS) {
+    snapshots.shift();
+
+    if (activeSnapshotIndex >= 0) {
+      activeSnapshotIndex -= 1;
+    }
+  }
+
+  activeSnapshotIndex = snapshots.length - 1;
+
+  renderHistory();
+};
+
+function renderHistory() {
+  if (!historyList) return;
+
+  historyList.innerHTML = "";
+
+  snapshots.forEach((item, index) => {
+    const wrapper = document.createElement("div");
+    wrapper.className = "history-item";
+
+    const thumb = document.createElement("img");
+    thumb.src = item.src;
+    thumb.alt = `Snapshot ${index + 1}`;
+    thumb.className = "history-thumb";
+
+    if (index === activeSnapshotIndex) {
+      thumb.classList.add("active");
+    }
+
+    thumb.addEventListener("click", () => {
+      activeSnapshotIndex = index;
+      freezeImage.src = item.src;
+      renderHistory();
+    });
+
+    const del = document.createElement("button");
+    del.type = "button";
+    del.className = "history-delete";
+    del.textContent = "×";
+
+    del.addEventListener("click", (e) => {
+      e.stopPropagation(); // prevent selecting the thumbnail
+      deleteSnapshot(index);
+    });
+
+    wrapper.appendChild(thumb);
+    wrapper.appendChild(del);
+    historyList.appendChild(wrapper);
+  });
+};
+
+function deleteSnapshot(index) {
+  if (index < 0 || index >= snapshots.length) return;
+
+  snapshots.splice(index, 1);
+
+  // adjust active index
+  if (snapshots.length === 0) {
+    activeSnapshotIndex = -1;
+    freezeImage.src = "";
+  } else if (activeSnapshotIndex === index) {
+    // if deleted the active one, pick the nearest valid index
+    activeSnapshotIndex = Math.min(index, snapshots.length - 1);
+    freezeImage.src = snapshots[activeSnapshotIndex].src;
+  } else if (activeSnapshotIndex > index) {
+    activeSnapshotIndex -= 1;
+  }
+
+  renderHistory();
+};
 
 openButton.addEventListener("click", () => {
   const url = urlInput.value;
@@ -49,6 +130,7 @@ freezeButton.addEventListener("click", async () => {
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
         freezeImage.src = canvas.toDataURL("image/png");
+        addSnapshot(freezeImage.src);
 
         stream.getTracks().forEach((track) => track.stop());
     } catch (err) {
@@ -58,12 +140,15 @@ freezeButton.addEventListener("click", async () => {
 
 cropButton.addEventListener("click", () => {
   cropMode = !cropMode;
+
   selectionBox.style.display = "none";
   isDragging = false;
   
   if (cropMode) {
+    imageStage.classList.add("crop-mode");
     cropStatus.textContent = "Crop mode is ON - drag to select an area";
   } else {
+    imageStage.classList.remove("crop-mode");
     cropStatus.textContent = "Crop mode is OFF";
   }
 
@@ -146,5 +231,17 @@ window.addEventListener("mouseup", () => {
   );
 
   freezeImage.src = canvas.toDataURL("image/png");
+  if (activeSnapshotIndex >= 0 && snapshots[activeSnapshotIndex]) {
+    snapshots[activeSnapshotIndex].src = freezeImage.src;
+    renderHistory();
+  } else {
+    addSnapshot(freezeImage.src);
+  }
   selectionBox.style.display = "none";
+
+  cropMode = false;
+  imageStage.classList.remove("crop-mode");
+  cropStatus.textContent = "Crop mode is OFF";
 });
+
+

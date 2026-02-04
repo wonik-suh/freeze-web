@@ -9,7 +9,6 @@
         <h1>Freeze v1</h1>
 
         <input id="urlInput" type="text" placeholder="Enter URL"/>
-
         <button id="openBtn">Open</button>
         <button id="freezeBtn">Freeze</button>
         <button id="cropBtn">Crop</button>
@@ -20,6 +19,12 @@
             <img id="freezeImage" alt=" Frozen snapshot" draggable="false"/>
             <div id="selectionBox"></div>
         </div>
+
+        <div id ="history">
+            <p class="history-title">Recent snapshots</p>
+            <div id="historyList"></div>
+        </div>
+
         <script src="script.js"></script>
     </body>
 </html>
