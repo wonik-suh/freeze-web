@@ -45,6 +45,12 @@ body {
   margin-bottom: 8px;
 }
 
+.history-cap {
+  font-size: 12px;
+  color: #888;
+  margin-left: 4px;
+}
+
 #historyList {
   display: flex;
   gap: 8px;
